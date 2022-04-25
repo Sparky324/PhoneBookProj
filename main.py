@@ -1,7 +1,9 @@
-import math_func
+import create_logic as cl
 
-a = float(input("Укажите, чему равно ребро куба "))
-print("Объем куба равен ", math_func.cube(a))
 
-a, b = input("Укажите катеты прямоуг. треуг. через пробел ").strip().split()
-print("Гипотенуза ", math_func.hipot(float(a), float(b)), "HI")
+PATH = "C://PhoneBook"
+FILE_NAME = "phone_book.db"
+
+
+print(cl.create_directory(PATH))
+print(cl.create_db(FILE_NAME, PATH))
