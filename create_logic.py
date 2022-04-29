@@ -1,5 +1,3 @@
-#""" ������ ��� �������� �����/���������� """
-
 import sqlite3 as sql
 from time import sleep
 import os

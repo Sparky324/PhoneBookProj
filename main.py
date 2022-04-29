@@ -11,6 +11,6 @@ print(cl.create_directory(PATH))
 print(cl.create_db(FILE_NAME, PATH))
 
 while True:
-    com = input(os.getcwd() + ' # ') 
+    com = input(os.getcwd() + ' # ')
     if fc.lexer(com): 
         break 

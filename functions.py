@@ -1,13 +1,13 @@
 import sqlite3 as sql
 
-def lexer(c):       # Специальная функция, которая будет разбивать
-                    # введенную строку на команду и аргумент
-    lex = ''        # Команда
-    arg = ''        # Аргумент
-    l = True        # Писать в команду или в аргумент?
+def lexer(c):      
+                   
+    lex = ''
+    arg = ''
+    l = True
     for i in c:
         if i == ' ' and l:
-            l = False       # Теперь будем писать в аргумент
+            l = False 
         elif l:
             lex += i 
         else:
@@ -15,13 +15,17 @@ def lexer(c):       # Специальная функция, которая будет разбивать
     return shell(lex,arg)
 
 
-def shell(lex,arg):         # Интерпретатор
+def shell(lex, arg):
     if lex == 'echo':
         print(arg)
     elif lex == 'exit':
         return True
-    elif lex == 'show_book':
+    elif lex == 'show':
         print(show(arg))
+    elif lex == 'help':
+        print(helper())
+    elif lex == 'delete':
+        delete_num(arg)
     elif lex == 'add':
         add_num(arg)
 
@@ -31,7 +35,7 @@ def show(arg):
     cur = conn.cursor()
     check_data = cur.execute("SELECT * FROM phone_book")
     all_res = check_data.fetchall()
-    return len(all_res)
+    return all_res
 
 def add_num(x):
     conn = sql.connect("C://PhoneBook/phone_book.db")
@@ -48,3 +52,20 @@ def add_num(x):
 
     cur.execute("INSERT INTO phone_book VALUES(?, ?, ?, ?);", number)
     conn.commit()
+
+def delete_num(x):
+    conn = sql.connect("C://PhoneBook/phone_book.db")
+    cur = conn.cursor()
+    cur.execute("DELETE FROM phone_book WHERE phone_number = (?)", (x,))
+    conn.commit()
+
+def helper():
+    return ("""=================================================================================================
+РЎРїРёСЃРѕРє РєРѕРјР°РЅРґ Рё РїСЂР°РІРёР»Р° РёС… РїСЂР°РІРёР»СЊРЅРѕРіРѕ РЅР°РїРёСЃР°РЅРёСЏ:
+    add <id РєРѕРЅС‚Р°РєС‚Р°(СѓРЅРёРєР°Р»СЊРЅС‹Р№)> <РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°> <РёРјСЏ> <СЌР»РµРєС‚СЂРѕРЅРЅР°СЏ РїРѕС‡С‚Р°> - РґРѕР±Р°РІРёС‚СЊ РЅРѕРІС‹Р№ РєРѕРЅС‚Р°РєС‚
+    exit - Р·Р°РєРѕРЅС‡РёС‚СЊ СЂР°Р±РѕС‚Сѓ РІ РїСЂРёР»РѕР¶РµРЅРёРё
+    help - РїРѕРєР°Р·Р°С‚СЊ СЌС‚РѕС‚ СЃРїРёСЃРѕРє
+    delete <id РєРѕРЅС‚Р°РєС‚Р°> - СѓРґР°Р»РёС‚СЊ РєРѕРЅС‚Р°РєС‚
+    show - РїРѕРєР°Р·Р°С‚СЊ СЃРїРёСЃРѕРє РєРѕРЅС‚Р°РєС‚РѕРІ
+=================================================================================================
+             """)
