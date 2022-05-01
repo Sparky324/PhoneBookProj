@@ -13,6 +13,6 @@ print("""=========>Добро пожаловать в Телефонную Кн�
 """)
 
 while True:
-    com = input(os.getcwd() + ' # ')
+    com = input("Enter your command ==> ")
     if fc.lexer(com): 
         break 
