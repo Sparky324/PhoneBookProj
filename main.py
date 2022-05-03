@@ -10,9 +10,9 @@ print(cl.create_directory(PATH))
 print(cl.create_db(FILE_NAME, PATH))
 
 print("""=========>Добро пожаловать в Телефонную Книгу!<=========
-""")
+Для получения справки выполните команду help""")
 
 while True:
-    com = input("Enter your command ==> ")
+    com = input("Введите команду ==> ")
     if fc.lexer(com): 
         break 

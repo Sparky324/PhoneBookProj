@@ -1,7 +1,11 @@
 import sqlite3 as sql
 import prettytable as pt
 import pandas as pd
-import pydrive as cloud
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+from secrets import token_hex
+
+global id_f
 
 def lexer(c):  
                    
@@ -19,9 +23,7 @@ def lexer(c):
 
 
 def shell(lex, arg):
-    if lex == 'echo':
-        print(arg)
-    elif lex == 'exit':
+    if lex == 'exit':
         return True
     elif lex == 'show':
         print(show())
@@ -33,40 +35,45 @@ def shell(lex, arg):
         print(found(arg))
     elif lex == 'exporttxt':
         print(export_txt(arg))
+    elif lex == 'token':
+        print(generate_show_token(arg))
+    elif lex == 'cloud':
+        print(to_cloud())
     elif lex == 'exportxlsx':
         print(export_xlsx(arg))
+    elif lex == 'import':
+        print(import_file(arg))
     elif lex == 'add':
         print(add_num(arg))
 
 
 def show():
-    try:
-        x = pt.PrettyTable()
-        x.field_names = ["Номер телефона", "Имя", "e-mail"]
-        conn = sql.connect("C://PhoneBook/phone_book.db")
-        cur = conn.cursor()
-        check_data = cur.execute("SELECT * FROM phone_book ORDER BY name ASC")
-        all_res = check_data.fetchall()
-        for i in all_res:
-            x.add_row(i)
-        return x
-    except sql.OperationalError:
-        create_table()
-        show()
+    x = pt.PrettyTable()
+    x.field_names = ["Номер телефона", "Имя", "e-mail"]
+    conn, cur = create_table()
+    check_data = cur.execute("SELECT * FROM phone_book ORDER BY name ASC")
+    all_res = check_data.fetchall()
+    x.add_rows(all_res)
+    return x
 
 def add_num(x):
-    conn, cur = create_table()
+    try:
+        conn, cur = create_table()
 
-    number = tuple(x.split())
+        number = tuple(x.split())
 
-    cur.execute("SELECT * FROM phone_book WHERE phone_number = (?)", (number[0],))
-    data = cur.fetchall()
+        cur.execute("SELECT * FROM phone_book WHERE phone_number = (?)", (number[0],))
+        data = cur.fetchall()
 
-    if len(data) != 0:
-        return "This number already taken."
-    cur.execute("INSERT INTO phone_book VALUES(?, ?, ?);", number)
-    conn.commit()
-    return "Successfully added."
+        if len(data) != 0:
+            return "Номер телефона уже занят"
+        cur.execute("INSERT INTO phone_book VALUES(?, ?, ?);", number)
+        conn.commit()
+        return "Успешно добавлено"
+    except IndexError:
+        return "Команда введена некорректно"
+    except sql.ProgrammingError:
+        return "Команда введена некорректно"
 
 def delete_num(x):
     try:
@@ -74,7 +81,7 @@ def delete_num(x):
         cur = conn.cursor()
         cur.execute("DELETE FROM phone_book WHERE phone_number = (?)", (x,))
         conn.commit()
-        return "Successfully deleted."
+        return "Успешно удалено"
     except sql.OperationalError:
         create_table()
         delete_num(x)
@@ -90,6 +97,8 @@ def helper():
     exporttxt <путь к файлу> - произвести экспорт книги в файл .txt, аргумент path -  optional, default = "C://PhoneBook/"
     exportxlsx <путь к файлу> - произвести экспорт книги в файл .xlsx, аргумент path - optional, default = "C://PhoneBook/"
     found <тип поиска(имя - name, номер - number или почта - mail)> <переменная для поиска> - найти контакты по заданному критерию
+    cloud - загрузить данные на Google Диск (потребуется авторизация черезе сервисы Google)
+    import <путь к файлу> - импортировать данные из стороннего .xlsx файла
 =================================================================================================
              """)
 
@@ -109,8 +118,7 @@ def export_txt(path):
     return f"File successfully created in {path}"
 
 def export_xlsx(path):
-    conn = sql.connect("C://PhoneBook/phone_book.db")
-    cur = conn.cursor()
+    conn, cur = create_table()
     check_data = cur.execute("SELECT * FROM phone_book")
     all_res = check_data.fetchall()
     data = pd.DataFrame(all_res)
@@ -118,12 +126,12 @@ def export_xlsx(path):
     if len(path) != 0:
         try:
             data.to_excel(path + "phone_book.xlsx", header = ["Номер телефона", "Имя", "e-mail"])
-            return f"File successfully created in {path}"
+            return f"Файл успешно создан в {path}"
         except PermissionError:
-            return "This path is unaviable. Try to use another path"
+            return "Путь недоступен. Попробуйте другой"
     path = "C://PhoneBook/"
     data.to_excel(path + "phone_book.xlsx", header = ["Номер телефона", "Имя", "e-mail"])
-    return f"File successfully created in {path}"
+    return f"Файл успешно создан в {path}"
 
 def create_table():
     conn = sql.connect("C://PhoneBook/phone_book.db")
@@ -145,7 +153,7 @@ def found(x):
     elif zapros[0] == 'mail':
         return found_mail(zapros[1])
     else:
-        return "Error: Unexpected argument for type."
+        return "Ошибка: неправильный аргумент типа"
 
 def found_name(x):
     conn = sql.connect("C://PhoneBook/phone_book.db")
@@ -157,8 +165,7 @@ def found_name(x):
     y = pt.PrettyTable()
     y.field_names = ["Номер телефона", "Имя", "e-mail"]
 
-    for i in data:
-        y.add_row(i)
+    y.add_rows(data)
 
     return y
 
@@ -172,8 +179,7 @@ def found_num(x):
     y = pt.PrettyTable()
     y.field_names = ["Номер телефона", "Имя", "e-mail"]
 
-    for i in data:
-        y.add_row(i)
+    y.add_rows(data)
 
     return y
 
@@ -187,11 +193,42 @@ def found_mail(x):
     y = pt.PrettyTable()
     y.field_names = ["Номер телефона", "Имя", "e-mail"]
 
-    for i in data:
-        y.add_row(i)
+    y.add_rows(data)
 
     return y
 
+def to_cloud():
+    gauth = GoogleAuth()
+    gauth.LocalWebserverAuth()
+    drive = GoogleDrive(gauth)
+    global id_f
 
-#def login(x):
-    #login, password = x.split
+    try:
+        file = drive.CreateFile({'id': id_f})
+        file.Delete()
+    except Exception as ex:
+        print('')
+
+    up_file = drive.CreateFile({'title': "phone_book.xlsx"})
+    export_xlsx('')
+    up_file.SetContentFile("C://PhoneBook/phone_book.xlsx")
+    up_file.Upload()
+    id_f = up_file['id']
+    return "Файл успешно загружен на Ваш Google Диск."
+
+def import_file(path):
+    conn, cur = create_table()
+
+    cur.execute("DELETE FROM phone_book;")
+    conn.commit()
+
+    try:
+        data = pd.read_excel(path)
+        data.drop(data.columns[0], axis = 1, inplace = True)
+        data = list(data.itertuples(index=False, name=None))
+
+        cur.executemany("INSERT INTO phone_book VALUES(?, ?, ?)", (data))
+        conn.commit()
+        return "Успешно импортировано"
+    except FileNotFoundError:
+        return "Файл по заданному пути не найден"

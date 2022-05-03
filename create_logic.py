@@ -4,13 +4,13 @@ import os
 def create_directory(path):
     try:
         os.makedirs(path)
-        return (f"Directory file succesfully created: {path}")
+        return (f"Директория создана: {path}")
     except FileExistsError:
-        return (f"Diretory {path} already exists")
+        return (f"Директория {path} уже существует")
 
 def create_db(name, path):
     if os.path.isfile(path + "/" + name):
-        return (f"Database already exists. Reading...")
+        return (f"Файл базы данных уже существует. Чтение...")
     else:
         conn = sql.connect(path + "/" + name)
-        return (f"Database succesfully created in {path}")
+        return (f"Файл базы данных успешно создан в {path}")
