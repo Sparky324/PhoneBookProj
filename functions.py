@@ -88,7 +88,7 @@ def delete_num(x):
 
 def helper():
     return ("""=================================================================================================
-Список команд и правила их правильного написания:
+Список команд и правила их написания:
     add <номер телефона> <имя> <электронная почта> - добавить новый контакт
     exit - закончить работу в приложении
     help - показать этот список
@@ -108,14 +108,14 @@ def export_txt(path):
             f = open(path + "phone_book.txt", 'w')
             f.write(show().get_string())
             f.close()
-            return f"File successfully created in {path}"
+            return f"Файл успешно создан в {path}"
         except PermissionError:
-            return "This path is unaviable. Try to use another path"
+            return "Путь недоступен. Попробуйте другой"
     path = "C://PhoneBook/"
     f = open(path + "phone_book.txt", 'w')
     f.write(show().get_string())
     f.close()
-    return f"File successfully created in {path}"
+    return f"Файл успешно создан в {path}"
 
 def export_xlsx(path):
     conn, cur = create_table()
