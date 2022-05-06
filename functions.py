@@ -53,7 +53,7 @@ def show():
     conn, cur = create_table()
     check_data = cur.execute("SELECT * FROM phone_book ORDER BY name ASC")
     all_res = check_data.fetchall()
-    x.add_rows(all_res)
+    x.add_rows(data)
     return x
 
 def add_num(x):
@@ -165,7 +165,8 @@ def found_name(x):
     y = pt.PrettyTable()
     y.field_names = ["Номер телефона", "Имя", "e-mail"]
 
-    y.add_rows(data)
+    for i in data:
+        y.add_row(i)
 
     return y
 
