@@ -8,6 +8,8 @@
     + [PrettyTable 0.9.0](https://ptable.readthedocs.io/en/latest/tutorial.html)
     + [Pandas 1.4.2](https://pandas.pydata.org)
     + [PyDrive 1.3.1](https://pypi.org/project/PyDrive/)
+    + [Openpyxl](https://openpyxl.readthedocs.io/en/stable/)
+    + [fsspec](https://filesystem-spec.readthedocs.io/en/latest/)
 + Запустить main.py через командную строку
 
 ## Функционал
