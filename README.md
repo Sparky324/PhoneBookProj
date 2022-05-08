@@ -11,6 +11,7 @@
     + [Openpyxl](https://openpyxl.readthedocs.io/en/stable/)
     + [fsspec](https://filesystem-spec.readthedocs.io/en/latest/)
 + Запустить main.py через командную строку
+ВНИМАНИЕ! Приложение разрабатывалось и тестировалось на платформе Windows 10. 
 
 ## Функционал
 Мое приложение предоставляет следующие возможности:
