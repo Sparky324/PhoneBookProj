@@ -1,3 +1,5 @@
+"""Эта библиотека содержит все функции приложения"""
+
 import sqlite3 as sql
 import prettytable as pt
 import pandas as pd
@@ -8,7 +10,9 @@ from secrets import token_hex
 global id_f
 
 def lexer(c):  
-                   
+    """
+        Эта функция делит вводимую строку на команду и аргумент
+    """    
     lex = ''
     arg = ''
     l = True
@@ -23,6 +27,9 @@ def lexer(c):
 
 
 def shell(lex, arg):
+    """
+        Эта функция обрабатывает аргументы и запускает соответствующую функцию
+    """
     if lex == 'exit':
         return True
     elif lex == 'show':
@@ -48,6 +55,10 @@ def shell(lex, arg):
 
 
 def show():
+    """
+        Эта функция возвращает объект класса PrettyTable и отвечает
+        за вывод базы данных на экран
+    """
     x = pt.PrettyTable()
     x.field_names = ["Номер телефона", "Имя", "e-mail"]
     conn, cur = create_table()
@@ -57,6 +68,11 @@ def show():
     return x
 
 def add_num(x):
+    """
+        Эта функция получает на вход строку х, в которой находятся
+        номер телефона, имя и почта пользователя, разделенные пробелом.
+        Отвечает за добавление контакта в БД
+    """
     try:
         conn, cur = create_table()
 
@@ -76,6 +92,10 @@ def add_num(x):
         return "Команда введена некорректно"
 
 def delete_num(x):
+    """
+        Эта функция получает на фход строку х - номер телефона.
+        Удаляет контакт с данным номером
+    """
     try:
         conn = sql.connect("C://PhoneBook/phone_book.db")
         cur = conn.cursor()
@@ -87,6 +107,9 @@ def delete_num(x):
         delete_num(x)
 
 def helper():
+    """
+        Эта функция выводит на экран руководство по внутренним командам
+    """
     return ("""=================================================================================================
 Список команд и правила их написания:
     add <номер телефона> <имя> <электронная почта> - добавить новый контакт
@@ -103,6 +126,10 @@ def helper():
              """)
 
 def export_txt(path):
+    """
+        Эта функция получает на вход строку - путь к папке.
+        Создает файл .txt в указанной папке (при возможности) и экспортирует туда БД
+    """
     if len(path) != 0:
         try:
             f = open(path + "phone_book.txt", 'w')
@@ -118,6 +145,10 @@ def export_txt(path):
     return f"Файл успешно создан в {path}"
 
 def export_xlsx(path):
+    """
+        Эта функция получает на вход строку - путь к папке.
+        Создает файл .xlsx в указанной папке (при возможности) и экспортирует туда БД
+    """
     conn, cur = create_table()
     check_data = cur.execute("SELECT * FROM phone_book")
     all_res = check_data.fetchall()
@@ -134,6 +165,9 @@ def export_xlsx(path):
     return f"Файл успешно создан в {path}"
 
 def create_table():
+    """
+        Эта функция создает в БД таблицу (при отсутствии)
+    """
     conn = sql.connect("C://PhoneBook/phone_book.db")
     cur = conn.cursor()
     cur.execute("""CREATE TABLE IF NOT EXISTS phone_book(
@@ -145,6 +179,10 @@ def create_table():
     return conn, cur
 
 def found(x):
+    """
+        Эта функция получает на вход строку - тип поиска и строку для поиска через пробел.
+        Вызывает одну из функций поиска в зависимости от типа
+    """
     zapros = x.split()
     if zapros[0] == 'name':
         return found_name(zapros[1])
@@ -156,6 +194,10 @@ def found(x):
         return "Ошибка: неправильный аргумент типа"
 
 def found_name(x):
+    """
+        Эта функция получает на вход строку - имя искомого контакта
+        Возвращает объект класса PrettyTable с контактами, подходящими по данному критерию
+    """
     conn = sql.connect("C://PhoneBook/phone_book.db")
     cur = conn.cursor()
 
@@ -170,6 +212,10 @@ def found_name(x):
     return y
 
 def found_num(x):
+    """
+        Эта функция получает на вход строку - номер телефона искомого контакта
+        Возвращает объект класса PrettyTable с контактами, подходящими по данному критерию
+    """
     conn = sql.connect("C://PhoneBook/phone_book.db")
     cur = conn.cursor()
 
@@ -184,6 +230,10 @@ def found_num(x):
     return y
 
 def found_mail(x):
+    """
+        Эта функция получает на вход строку - e-mail искомого контакта
+        Возвращает объект класса PrettyTable с контактами, подходящими по данному критерию
+    """
     conn = sql.connect("C://PhoneBook/phone_book.db")
     cur = conn.cursor()
 
@@ -198,6 +248,10 @@ def found_mail(x):
     return y
 
 def to_cloud():
+    """
+        Эта функция получает отвечает за авторизаци пользователя в аккаунте Google 
+        для последующего экспорта данных на его Google Drive
+    """
     gauth = GoogleAuth()
     gauth.LocalWebserverAuth()
     drive = GoogleDrive(gauth)
@@ -217,6 +271,11 @@ def to_cloud():
     return "Файл успешно загружен на Ваш Google Диск."
 
 def import_file(path):
+    """
+        Эта функция получает на вход строку - пуьть к файлу .xlsx
+        Импортирует контакты из файла по заданному пути.
+        ВНИМАНИЕ - предыдущие данные в БД будут стерты
+    """
     conn, cur = create_table()
 
     cur.execute("DELETE FROM phone_book;")
