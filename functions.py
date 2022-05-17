@@ -64,7 +64,8 @@ def show():
     conn, cur = create_table()
     check_data = cur.execute("SELECT * FROM phone_book ORDER BY name ASC")
     all_res = check_data.fetchall()
-    x.add_rows(data)
+    for i in all_res:
+        x.add_row(i)
     return x
 
 def add_num(x):
