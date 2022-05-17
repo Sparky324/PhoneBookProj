@@ -5,7 +5,6 @@ import prettytable as pt
 import pandas as pd
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
-from secrets import token_hex
 
 global id_f
 
